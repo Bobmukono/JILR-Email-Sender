@@ -372,3 +372,5 @@ For issues or questions:
 ## Disclaimer
 
 This tool is for educational purposes and legitimate use cases with recipient consent. Misuse for spam or unsolicited emails violates terms of service of email providers and may be illegal in your jurisdiction. Use responsibly and ethically.
+#   J I L R - E m a i l - S e n d e r  
+ 
