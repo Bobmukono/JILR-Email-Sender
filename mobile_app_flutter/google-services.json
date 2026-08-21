@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "716341702547",
+    "project_id": "jilr-email-sender-9074e",
+    "storage_bucket": "jilr-email-sender-9074e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716341702547:android:f2c87d2284c16ec7a78266",
+        "android_client_info": {
+          "package_name": "com.jilr.emailsender"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "716341702547-vhn5sl9dm1079di36jlt0389eldh92ra.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVpLQbMMSOUiGsFNCLnKMpTLrW3U43xK8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "716341702547-vhn5sl9dm1079di36jlt0389eldh92ra.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

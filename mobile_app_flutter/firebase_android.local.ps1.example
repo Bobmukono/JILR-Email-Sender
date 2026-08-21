@@ -1,0 +1,9 @@
+# Copy this file to firebase_android.local.ps1 (same folder) and fill in real values.
+# firebase_android.local.ps1 is git-ignored; never commit real Firebase secrets.
+
+$env:APP_FIREBASE_API_KEY = "YOUR_API_KEY"
+$env:APP_FIREBASE_APP_ID = "1:716341702547:android:f2c87d2284c16ec7a78266"
+$env:APP_FIREBASE_MESSAGING_SENDER_ID = "716341702547"
+$env:APP_FIREBASE_PROJECT_ID = "jilr-email-sender-9074e"
+$env:APP_FIREBASE_STORAGE_BUCKET = "jilr-email-sender-9074e.firebasestorage.app"
+$env:APP_FIREBASE_AUTH_DOMAIN = "jilr-email-sender-9074e.firebaseapp.com"
