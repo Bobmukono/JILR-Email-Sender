@@ -9,7 +9,7 @@ from google_auth_oauthlib.flow import Flow
 
 from .config import load_settings
 from .daraja_service import plan_amount, query_stk_status, start_stk_push
-from .gmail_service import GMAIL_SCOPES, build_credentials, credentials_to_dict, send_message
+from .gmail_service import GMAIL_SCOPES, GmailReauthRequired, build_credentials, credentials_to_dict, send_message
 from .schemas import (
     BatchResponse,
     SendBatchRequest,
@@ -44,7 +44,7 @@ def _build_flow(state: str | None = None) -> Flow:
         "web": {
             "client_id": settings["google_client_id"],
             "client_secret": settings["google_client_secret"],
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "auth_uri": "https://accounts.google.com/o/oauth2/v2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
         }
     }
@@ -58,7 +58,13 @@ def _get_user_credentials(user_id: str):
     if not token_data:
         raise HTTPException(status_code=404, detail="User is not connected to Gmail")
 
-    creds = build_credentials(token_data, settings["google_client_id"], settings["google_client_secret"])
+    try:
+        creds = build_credentials(token_data, settings["google_client_id"], settings["google_client_secret"])
+    except GmailReauthRequired as exc:
+        # Dead refresh token: drop it so /auth/status correctly reports disconnected.
+        store.delete_token(user_id)
+        raise HTTPException(status_code=401, detail=str(exc)) from exc
+
     store.save_token(user_id, credentials_to_dict(creds))
     return creds
 
@@ -112,6 +118,37 @@ def auth_status(user_id: str = Query(..., min_length=1)) -> dict:
         "user_id": user_id,
         "connected": token_data is not None,
     }
+
+
+@app.get("/auth/token-status")
+def auth_token_status(user_id: str = Query(..., min_length=1)) -> dict:
+    token_data = store.get_token(user_id)
+    if not token_data:
+        return {
+            "user_id": user_id,
+            "has_token": False,
+            "expired": None,
+            "needs_reauth": False,
+        }
+
+    try:
+        creds = build_credentials(token_data, settings["google_client_id"], settings["google_client_secret"])
+        store.save_token(user_id, credentials_to_dict(creds))
+        return {
+            "user_id": user_id,
+            "has_token": True,
+            "expired": False,
+            "needs_reauth": False,
+        }
+    except GmailReauthRequired as exc:
+        store.delete_token(user_id)
+        return {
+            "user_id": user_id,
+            "has_token": False,
+            "expired": True,
+            "needs_reauth": True,
+            "reason": str(exc),
+        }
 
 
 @app.post("/subscription/start", response_model=SubscriptionStartResponse)
@@ -238,8 +275,9 @@ def send_single(payload: SendSingleRequest):
         store.log_event(payload.user_id, payload.recipient, payload.subject, True)
         return SendResponse(sent=True, message="Email sent")
     except Exception as exc:
-        store.log_event(payload.user_id, payload.recipient, payload.subject, False, str(exc))
-        raise HTTPException(status_code=500, detail=f"Gmail API send failed: {exc}")
+        detail = str(exc)
+        store.log_event(payload.user_id, payload.recipient, payload.subject, False, detail)
+        raise HTTPException(status_code=500, detail=f"Gmail API send failed: {detail}")
 
 
 @app.post("/send/batch", response_model=BatchResponse)

@@ -4,7 +4,7 @@ Use this checklist to prepare the Firebase preview path for the Flutter Android 
 
 ## 1. Create the Firebase project
 - Open the Firebase Console.
-- Create or select the project for JILR Email Sender.
+- Create or select the project for JILR EMAIL Sender.
 - Enable Authentication.
 - Enable the sign-in methods you need for the migration path.
 
